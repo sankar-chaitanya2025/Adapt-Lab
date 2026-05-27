@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0f172a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-5 py-2.5 bg-accent-600 text-white font-medium rounded-lg
+           hover:bg-accent-500 active:bg-accent-700
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-surface-950;
+  }
+
+  .btn-secondary {
+    @apply px-5 py-2.5 bg-surface-700 text-surface-200 font-medium rounded-lg
+           border border-surface-600
+           hover:bg-surface-600 active:bg-surface-800
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-surface-400 focus:ring-offset-2 focus:ring-offset-surface-950;
+  }
+
+  .card {
+    @apply bg-surface-800/60 backdrop-blur-sm border border-surface-700/50
+           rounded-xl p-5 shadow-lg shadow-black/10;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 bg-surface-800 border border-surface-600
+           rounded-lg text-surface-100 placeholder-surface-400
+           focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500
+           transition-colors duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-mastered {
+    @apply badge bg-accent-500/20 text-accent-400 border border-accent-500/30;
+  }
+
+  .badge-in-progress {
+    @apply badge bg-blue-500/20 text-blue-400 border border-blue-500/30;
+  }
+
+  .badge-struggling {
+    @apply badge bg-danger-400/20 text-danger-400 border border-danger-400/30;
+  }
+
+  .badge-not-started {
+    @apply badge bg-surface-600/20 text-surface-400 border border-surface-600/30;
+  }
+}
+
+/* Monaco editor overrides */
+.monaco-editor .margin,
+.monaco-editor .monaco-scrollable-element {
+  border-radius: 0 0 0.75rem 0.75rem;
+}

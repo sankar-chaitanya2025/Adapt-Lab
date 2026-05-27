@@ -1,0 +1,95 @@
+version: "3.8"
+
+services:
+  # ---- AdaptLab PostgreSQL ----
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: adaptlab
+      POSTGRES_PASSWORD: adaptlab
+      POSTGRES_DB: adaptlab
+    volumes:
+      - adaptlab_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adaptlab"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---- Judge0 PostgreSQL ----
+  judge0-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0
+      POSTGRES_DB: judge0
+    volumes:
+      - judge0_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U judge0"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---- Judge0 Redis ----
+  judge0-redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---- Judge0 CE ----
+  judge0:
+    image: judge0/judge0-ce:1.13.1
+    platform: linux/amd64
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: judge0-db
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0
+      REDIS_HOST: judge0-redis
+      RAILS_MAX_THREADS: 4
+      RAILS_ENV: production
+      ALLOW_ORIGIN: "*"
+    privileged: true
+    restart: unless-stopped
+
+  # ---- FastAPI Backend ----
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+      judge0:
+        condition: service_started
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./backend/curriculum:/app/curriculum
+    restart: unless-stopped
+
+  # ---- React Frontend (nginx) ----
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  adaptlab_db_data:
+  judge0_db_data:
